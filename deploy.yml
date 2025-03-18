@@ -1,0 +1,36 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main  # Déclenche la pipeline uniquement sur la branche main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v3
+
+      - name: Configuration de Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Installation des dépendances
+        run: pip install -r requirements.txt
+
+      - name: Exécution des tests
+        run: pytest  # Si vous avez des tests automatisés
+
+      - name: Construction de l'application
+        run: |
+          pip install pyinstaller
+          pyinstaller --onefile votre_script.py
+
+      - name: Publier l'artéfact de build
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: dist/
