@@ -20,8 +20,7 @@ def check_for_update():
         if response.status_code == 200:
             release_data = response.json()
             latest_tag = release_data["tag_name"]
-            # Ici, vous pouvez définir une stratégie de comparaison.
-            # Par exemple, si votre version locale ne correspond pas au tag de la release :
+            # Définition d'une stratégie de comparaison.
             if latest_tag != APP_VERSION:
                 return release_data  # Une nouvelle version est disponible.
         return None
@@ -29,28 +28,31 @@ def check_for_update():
         print("Erreur lors de la vérification de la mise à jour :", e)
         return None
 
-def perform_update(update_data):
-    assets = update_data.get("assets", [])
-    if assets:
-        # recherche d'un asset correspondant au fichier d'installation.
-        download_url = assets[0]["browser_download_url"]
-        try:
-            response = requests.get(download_url)
-            if response.status_code == 200:
-                # On télécharge et on extrait le ZIP dans un répertoire temporaire.
-                with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-                    extract_path = os.path.join(os.getcwd(), "update_temp")
-                    z.extractall(extract_path)
-                    # Mis en place dela logique pour remplacer vos fichiers actuels.
-                    messagebox.showinfo("Mise à jour", "Mise à jour téléchargée. Redémarrage en cours...")
-                    # Lancement d'un script d'updater externe qui, après avoir terminé, relance votre app.
-        except Exception as e:
-            messagebox.showerror("Erreur", f"Impossible de télécharger la mise à jour : {e}")
-    else:
-        messagebox.showinfo("Mise à jour", "Aucun asset trouvé pour la mise à jour.")
+def perform_update(release_data):
+    assets = release_data.get("assets", [])
+    if not assets:
+        messagebox.showinfo("Mise à jour", "Aucun asset disponible pour la mise à jour.")
+        return
+    # Premier asset soit le fichier ZIP de l'application mise à jour.
+    download_url = assets[0]["browser_download_url"]
+    try:
+        response = requests.get(download_url)
+        if response.status_code == 200:
+            # Extraction du contenu ZIP dans un dossier temporaire.
+            with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+                update_path = os.path.join(os.getcwd(), "update_temp")
+                if not os.path.exists(update_path):
+                    os.makedirs(update_path)
+                z.extractall(update_path)
+                messagebox.showinfo("Mise à jour", "Mise à jour téléchargée.\nVeuillez redémarrer l'application pour appliquer les changements.")
+                # Ajout de la logique pour remplacer les fichiers actuels par ceux de l'update. 
+        else:
+            messagebox.showerror("Erreur", "Erreur lors du téléchargement de la mise à jour.")
+    except Exception as e:
+        messagebox.showerror("Erreur", f"Impossible de télécharger la mise à jour : {e}")
 
 # Application version
-APP_VERSION = "1.2"
+APP_VERSION = "1.1"
 
 # Configuration de la base de données MariaDB
 db_config = {
