@@ -8,10 +8,11 @@ import mariadb # Pour connecter et enregistrer les résultats dans une base de d
 import subprocess # Pour exécuter des commandes système (comme le ping) et récupérer les résultats.
 import platform # Pour exécuter des commandes système (comme le ping) et adapter ces commandes selon l'OS.
 import netifaces # Pour récupérer les informations de l'interface réseau (IP locale, masque de sous-réseau).
-import zipfile # Pour compresser les fichiers avant de les envoyer par e-mail.
+import zipfile # Pour utiliser des fichiers compresser.
 import os # Pour gérer les fichiers et les répertoires.
 import io # Pour lire et écrire des données en mode binaire.
 import requests # Pour envoyer des requêtes HTTP et télécharger des fichiers.
+import shutil # Pour copier des fichiers et des répertoires.
 
 def check_for_update():
     url = "https://api.github.com/repos/Caglihost/Sea_hawk2/releases/latest"
@@ -32,26 +33,56 @@ def perform_update(release_data):
     assets = release_data.get("assets", [])
     if not assets:
         messagebox.showinfo("Mise à jour", "Aucun asset disponible pour la mise à jour.")
-    # Premier asset soit le fichier ZIP de l'application mise à jour.
-    download_url = assets[0]["browser_download_url"]
+        return
+
+    download_url = assets[0].get("browser_download_url")
+    if not download_url:
+        messagebox.showinfo("Mise à jour", "Impossible de récupérer l'URL de téléchargement.")
+        return
+
     try:
-        response = requests.get(download_url)
+        response = requests.get(download_url, stream=True)
         if response.status_code == 200:
-            # Extraction du contenu ZIP dans un dossier temporaire.
+            # 1. Crée un dossier temporaire pour extraire le ZIP
+            temp_folder = os.path.join(os.getcwd(), "update_temp")
+            if not os.path.exists(temp_folder):
+                os.makedirs(temp_folder)
+
+            # 2. Extraction en mémoire puis dans temp_folder
             with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-                update_path = os.path.join(os.getcwd(), "update_temp")
-                if not os.path.exists(update_path):
-                    os.makedirs(update_path)
-                z.extractall(update_path)
-                messagebox.showinfo("Mise à jour", "Mise à jour téléchargée.\nVeuillez redémarrer l'application pour appliquer les changements.")
-                # Ajout de la logique pour remplacer les fichiers actuels par ceux de l'update. 
+                z.extractall(temp_folder)
+
+            # 3. Définir le dossier de destination
+            destination_folder = r"C:\SH_H2_CLIENT2"
+
+            # 4. Parcourir tous les fichiers du dossier temporaire et les copier dans le dossier cible
+            for root, dirs, files in os.walk(temp_folder):
+                for file in files:
+                    src_file = os.path.join(root, file)
+                    # On calcule le chemin relatif par rapport à temp_folder
+                    relative_path = os.path.relpath(src_file, temp_folder)
+                    dest_file = os.path.join(destination_folder, relative_path)
+
+                    # Crée les sous-dossiers si nécessaire
+                    os.makedirs(os.path.dirname(dest_file), exist_ok=True)
+
+                    # Copie en écrasant (copy2 conserve les métadonnées si possible)
+                    shutil.copy2(src_file, dest_file)
+
+            # 5. Nettoyage du dossier temporaire
+            shutil.rmtree(temp_folder, ignore_errors=True)
+
+            messagebox.showinfo(
+                "Mise à jour",
+                "Mise à jour téléchargée et installée.\nVeuillez redémarrer l'application."
+            )
         else:
             messagebox.showerror("Erreur", "Erreur lors du téléchargement de la mise à jour.")
     except Exception as e:
         messagebox.showerror("Erreur", f"Impossible de télécharger la mise à jour : {e}")
 
 # Application version
-APP_VERSION = "1.3"
+APP_VERSION = "1.1"
 
 # Configuration de la base de données MariaDB
 db_config = {
