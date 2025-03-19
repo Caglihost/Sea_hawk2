@@ -52,7 +52,7 @@ def perform_update(release_data):
         messagebox.showerror("Erreur", f"Impossible de télécharger la mise à jour : {e}")
 
 # Application version
-APP_VERSION = "1.1"
+APP_VERSION = "1.2"
 
 # Configuration de la base de données MariaDB
 db_config = {
