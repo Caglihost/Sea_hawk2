@@ -49,7 +49,7 @@ def perform_update(update_data):
         messagebox.showinfo("Mise à jour", "Aucun asset trouvé pour la mise à jour.")
 
 # Application version
-APP_VERSION = "1.1"
+APP_VERSION = "1.2"
 
 # Configuration de la base de données MariaDB
 db_config = {
