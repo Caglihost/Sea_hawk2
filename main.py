@@ -1,11 +1,11 @@
-import tkinter as tk
+import tkinter as tk # Pour créer l'interface graphique (GUI) de l'application.
 from tkinter import ttk # Pour créer l'interface graphique (GUI) de l'application.
 from tkinter import messagebox # Pour afficher des messages d'erreur ou de confirmation.
 import nmap # Pour lancer des scans de ports et détecter les hôtes actifs sur le réseau.
 import socket # Pour obtenir des informations sur la machine (adresse IP, hostname).
 import threading # Pour exécuter les scans en parallèle sans bloquer l'interface.
 import mariadb # Pour connecter et enregistrer les résultats dans une base de données MariaDB.
-import subprocess
+import subprocess # Pour exécuter des commandes système (comme le ping) et récupérer les résultats.
 import platform # Pour exécuter des commandes système (comme le ping) et adapter ces commandes selon l'OS.
 import netifaces # Pour récupérer les informations de l'interface réseau (IP locale, masque de sous-réseau).
 import zipfile # Pour compresser les fichiers avant de les envoyer par e-mail.
@@ -18,11 +18,12 @@ def check_for_update():
     try:
         response = requests.get(url)
         if response.status_code == 200:
-            data = response.json()
-            # On suppose que le tag est de type "v1.1"
-            latest_version = data["tag_name"].lstrip("v")
-            if latest_version > APP_VERSION:
-                return data  # Retourne les infos sur la release
+            release_data = response.json()
+            latest_tag = release_data["tag_name"]
+            # Ici, vous pouvez définir une stratégie de comparaison.
+            # Par exemple, si votre version locale ne correspond pas au tag de la release :
+            if latest_tag != APP_VERSION:
+                return release_data  # Une nouvelle version est disponible.
         return None
     except Exception as e:
         print("Erreur lors de la vérification de la mise à jour :", e)
@@ -49,7 +50,7 @@ def perform_update(update_data):
         messagebox.showinfo("Mise à jour", "Aucun asset trouvé pour la mise à jour.")
 
 # Application version
-APP_VERSION = "1.2"
+APP_VERSION = "1.1"
 
 # Configuration de la base de données MariaDB
 db_config = {
