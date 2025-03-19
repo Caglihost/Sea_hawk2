@@ -32,7 +32,6 @@ def perform_update(release_data):
     assets = release_data.get("assets", [])
     if not assets:
         messagebox.showinfo("Mise à jour", "Aucun asset disponible pour la mise à jour.")
-        return
     # Premier asset soit le fichier ZIP de l'application mise à jour.
     download_url = assets[0]["browser_download_url"]
     try:
@@ -52,7 +51,7 @@ def perform_update(release_data):
         messagebox.showerror("Erreur", f"Impossible de télécharger la mise à jour : {e}")
 
 # Application version
-APP_VERSION = "1.2"
+APP_VERSION = "1.1"
 
 # Configuration de la base de données MariaDB
 db_config = {
