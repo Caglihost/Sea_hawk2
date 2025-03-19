@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk # Pour créer l'interface graphique (GUI) de l'application.
+from tkinter import messagebox # Pour afficher des messages d'erreur ou de confirmation.
 import nmap # Pour lancer des scans de ports et détecter les hôtes actifs sur le réseau.
 import socket # Pour obtenir des informations sur la machine (adresse IP, hostname).
 import threading # Pour exécuter les scans en parallèle sans bloquer l'interface.
@@ -7,9 +8,48 @@ import mariadb # Pour connecter et enregistrer les résultats dans une base de d
 import subprocess
 import platform # Pour exécuter des commandes système (comme le ping) et adapter ces commandes selon l'OS.
 import netifaces # Pour récupérer les informations de l'interface réseau (IP locale, masque de sous-réseau).
+import zipfile # Pour compresser les fichiers avant de les envoyer par e-mail.
+import os # Pour gérer les fichiers et les répertoires.
+import io # Pour lire et écrire des données en mode binaire.
+import requests # Pour envoyer des requêtes HTTP et télécharger des fichiers.
+
+def check_for_update():
+    url = "https://api.github.com/repos/Caglihost/Sea_hawk2/releases//latest"
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            # On suppose que le tag est de type "v1.1"
+            latest_version = data["tag_name"].lstrip("v")
+            if latest_version > APP_VERSION:
+                return data  # Retourne les infos sur la release
+        return None
+    except Exception as e:
+        print("Erreur lors de la vérification de la mise à jour :", e)
+        return None
+
+def perform_update(update_data):
+    assets = update_data.get("assets", [])
+    if assets:
+        # recherche d'un asset correspondant au fichier d'installation.
+        download_url = assets[0]["browser_download_url"]
+        try:
+            response = requests.get(download_url)
+            if response.status_code == 200:
+                # On télécharge et on extrait le ZIP dans un répertoire temporaire.
+                with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+                    extract_path = os.path.join(os.getcwd(), "update_temp")
+                    z.extractall(extract_path)
+                    # Mis en place dela logique pour remplacer vos fichiers actuels.
+                    messagebox.showinfo("Mise à jour", "Mise à jour téléchargée. Redémarrage en cours...")
+                    # Lancement d'un script d'updater externe qui, après avoir terminé, relance votre app.
+        except Exception as e:
+            messagebox.showerror("Erreur", f"Impossible de télécharger la mise à jour : {e}")
+    else:
+        messagebox.showinfo("Mise à jour", "Aucun asset trouvé pour la mise à jour.")
 
 # Application version
-APP_VERSION = "1.0.1"
+APP_VERSION = "1.1"
 
 # Configuration de la base de données MariaDB
 db_config = {
