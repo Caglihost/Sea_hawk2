@@ -49,7 +49,7 @@ def perform_update(update_data):
         messagebox.showinfo("Mise à jour", "Aucun asset trouvé pour la mise à jour.")
 
 # Application version
-APP_VERSION = "1.2"
+APP_VERSION = "1.1"
 
 # Configuration de la base de données MariaDB
 db_config = {
@@ -244,6 +244,14 @@ def measure_latency(target="8.8.8.8"):
         return f"Erreur : {e}"
 
 def create_interface():
+    # Vérification de mise à jour avant d'ouvrir l'interface principale
+    update_data = check_for_update()
+    if update_data:
+        if messagebox.askyesno("Mise à jour disponible", "Une nouvelle version est disponible. Voulez-vous mettre à jour ?"):
+            perform_update(update_data)
+            # Optionnel : quitter l'application pour permettre la mise à jour
+            return    
+    
     global results_text, network_range_var, progress_bar, progress_label, root
     global tree, num_machines_label
 
