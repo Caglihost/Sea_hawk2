@@ -14,7 +14,7 @@ import io # Pour lire et écrire des données en mode binaire.
 import requests # Pour envoyer des requêtes HTTP et télécharger des fichiers.
 
 def check_for_update():
-    url = "https://api.github.com/repos/Caglihost/Sea_hawk2/releases//latest"
+    url = "https://api.github.com/repos/Caglihost/Sea_hawk2/releases/latest"
     try:
         response = requests.get(url)
         if response.status_code == 200:
