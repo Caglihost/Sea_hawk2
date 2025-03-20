@@ -15,7 +15,7 @@ import shutil # Importation du module shutil pour les opérations de fichiers
 import sys  # Nécessaire pour lancer update.py et quitter l'application
 
 # Application version
-APP_VERSION = "1.1"
+APP_VERSION = "1.3"
 
 def check_for_update():
     url = "https://api.github.com/repos/Caglihost/Sea_hawk2/releases/latest"
