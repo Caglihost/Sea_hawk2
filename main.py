@@ -53,7 +53,7 @@ def perform_update(release_data):
                 z.extractall(temp_folder)
 
             # 3. Définir le dossier de destination
-            destination_folder = r"C:\SH_H2_CLIENT2"
+            destination_folder = os.path.dirname(os.path.abspath(__file__))
 
             # 4. Parcourir tous les fichiers du dossier temporaire et les copier dans le dossier cible
             for root, dirs, files in os.walk(temp_folder):
